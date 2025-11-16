@@ -1,0 +1,334 @@
+// =============================================================================
+// Lei et al. (2021) Odor Plume Navigation - IBAMR Implementation
+// Paper: "Navigation in odor plumes: How do the flapping kinematics
+//         modulate the odor landscape?"
+// DOI: https://doi.org/10.2514/6.2021-2817
+// =============================================================================
+
+// Physical parameters
+Re = 1000.0                        // Reynolds number
+MU = 1.0 / Re                      // Dynamic viscosity
+RHO = 1.0                          // Fluid density
+
+// Odor transport parameters
+SCHMIDT = 100.0                    // Schmidt number Sc = ν/D
+KAPPA = MU / (RHO * SCHMIDT)       // Diffusion coefficient D = ν/Sc
+
+// Flapping parameters
+FREQUENCY = 0.5                    // Flapping frequency (Hz)
+HEAVE_AMPLITUDE = 0.2              // Heave amplitude / chord
+PITCH_AMPLITUDE = 15.0             // Pitch amplitude (degrees)
+PHASE_OFFSET = 90.0                // Phase offset (degrees, pitch leads heave)
+
+// Computed Strouhal number (approximate, assuming U_inf = 1.0)
+// St = f * A / U_inf ≈ 0.5 * 0.4 / 1.0 = 0.2 (peak-to-peak amplitude = 2*h_0)
+
+// Grid spacing parameters
+MAX_LEVELS = 3                     // AMR levels
+REF_RATIO  = 4, 4                  // Refinement ratio between levels
+N = 128                            // Base grid resolution
+
+// Solver parameters
+DELTA_FUNCTION       = "IB_4"      // 4-point delta function
+START_TIME           = 0.0
+END_TIME             = 20.0        // ~10 flapping cycles
+MAX_INTEGRATOR_STEPS = 10000000
+CFL_MAX              = 0.3
+DT_MAX               = 0.01
+VORTICITY_TAGGING    = TRUE        // Refine based on vorticity
+TAG_BUFFER           = 2
+OUTPUT_U             = TRUE
+OUTPUT_P             = TRUE
+OUTPUT_F             = TRUE
+OUTPUT_OMEGA         = TRUE
+OUTPUT_DIV_U         = FALSE
+
+// =============================================================================
+// NAVIER-STOKES SOLVER
+// =============================================================================
+INSStaggeredHierarchyIntegrator {
+   mu  = MU
+   rho = RHO
+
+   start_time = START_TIME
+   end_time = END_TIME
+   grow_dt = 2.0
+   num_cycles = 1
+
+   cfl = CFL_MAX
+   dt_max = DT_MAX
+
+   enable_logging = TRUE
+
+   // Output variables
+   output_U = OUTPUT_U
+   output_P = OUTPUT_P
+   output_F = OUTPUT_F
+   output_Omega = OUTPUT_OMEGA
+   output_Div_U = OUTPUT_DIV_U
+
+   // Convection scheme
+   convective_op_type = "PPM"              // Piecewise Parabolic Method
+   convective_difference_form = "ADVECTIVE"
+
+   // Pressure solver
+   normalize_pressure = TRUE
+
+   // Viscous solver (implicit)
+   viscous_time_stepping_type = "BACKWARD_EULER"
+
+   // Linear solver for viscous terms
+   viscous_solver_type = "PETSC_KRYLOV_SOLVER"
+   viscous_solver_db {
+      ksp_type = "fgmres"
+      max_iterations = 100
+      rel_residual_tol = 1.0e-6
+      abs_residual_tol = 1.0e-50
+   }
+
+   // Velocity projection
+   velocity_projection_type = "PRESSURE_UPDATE"
+
+   // Pressure Poisson solver
+   pressure_solver_type = "PETSC_KRYLOV_SOLVER"
+   pressure_solver_db {
+      ksp_type = "fgmres"
+      max_iterations = 100
+      rel_residual_tol = 1.0e-6
+      abs_residual_tol = 1.0e-50
+   }
+}
+
+// =============================================================================
+// ADVECTION-DIFFUSION SOLVER (ODOR TRANSPORT)
+// =============================================================================
+AdvDiffHierarchyIntegrator {
+   start_time = START_TIME
+   end_time = END_TIME
+   grow_dt = 2.0
+   num_cycles = 1
+
+   // Convection scheme (conservative for mass conservation)
+   convective_op_type = "PPM"
+   convective_difference_form = "CONSERVATIVE"
+
+   // Diffusion scheme (implicit - unconditionally stable)
+   diffusion_time_stepping_type = "BACKWARD_EULER"
+
+   cfl = 0.5
+   dt_max = DT_MAX
+
+   enable_logging = TRUE
+}
+
+// Odor initial condition
+OdorInitialConditions {
+   // Gaussian blob upstream of foil
+   // Centered at (-2.0, 0.0), width σ = 0.3
+   function_0 = "1.0 * exp(-((X_0 + 2.0)^2 + X_1^2) / (2.0 * 0.3^2))"
+}
+
+// Odor boundary conditions
+OdorBcCoefs {
+   // Neumann (zero flux) at all boundaries
+   acoef_function_0 = "0.0"
+   acoef_function_1 = "0.0"
+   acoef_function_2 = "0.0"
+   acoef_function_3 = "0.0"
+
+   bcoef_function_0 = "1.0"
+   bcoef_function_1 = "1.0"
+   bcoef_function_2 = "1.0"
+   bcoef_function_3 = "1.0"
+
+   gcoef_function_0 = "0.0"
+   gcoef_function_1 = "0.0"
+   gcoef_function_2 = "0.0"
+   gcoef_function_3 = "0.0"
+}
+
+// Odor source term (optional - continuous source at foil)
+OdorSource {
+   // Small Gaussian source at foil leading edge (x=0, y=0)
+   // Strength Q = 0.5, width σ = 0.05
+   function = "0.5 * exp(-(X_0^2 + X_1^2) / (2.0 * 0.05^2))"
+}
+
+// =============================================================================
+// IMMERSED BOUNDARY METHOD
+// =============================================================================
+ConstraintIBMethod {
+   delta_fcn = DELTA_FUNCTION
+   enable_logging = TRUE
+   needs_divfree_velocity_u = FALSE
+
+   PrintOutput {
+      print_output = TRUE
+      output_interval = 1
+      output_drag = TRUE
+      output_power = TRUE
+      output_rig_transvel = TRUE
+      output_rig_rotvel = TRUE
+      output_com_coords = TRUE
+      output_moment_inertia = FALSE
+      output_eulerian_mom = FALSE
+      output_dirname = "./FlappingFoil"
+      base_filename = "flapping_foil"
+   }
+}
+
+// Flapping foil kinematics
+ConstraintIBKinematics {
+   flapping_foil {
+      structure_names = "foil"
+      structure_levels = MAX_LEVELS - 1
+
+      calculate_translational_momentum = 1, 1, 0
+      calculate_rotational_momentum = 0, 0, 1
+
+      lag_position_update_method = "CONSTRAINT_VELOCITY"
+
+      // Kinematics parameters (from input file top)
+      frequency = FREQUENCY
+      heave_amplitude = HEAVE_AMPLITUDE
+      pitch_amplitude = PITCH_AMPLITUDE
+      phase_offset = PHASE_OFFSET
+
+      // Pivot point (quarter-chord for typical foils)
+      pivot_point_x = 0.25
+      pivot_point_y = 0.0
+
+      // Initial position (foil centered at origin)
+      initial_offset_x = 0.0
+      initial_offset_y = 0.0
+   }
+}
+
+// =============================================================================
+// DOMAIN GEOMETRY
+// =============================================================================
+CartesianGeometry {
+   domain_boxes = [(0,0), (4*N-1, 2*N-1)]
+
+   // Domain size: 8L × 4L (L = chord = 1.0)
+   // Foil at origin, upstream region for odor blob
+   x_lo = -2.0, -2.0
+   x_up =  6.0,  2.0
+
+   // Periodic in y-direction only (streamwise flow in x)
+   periodic_dimension = 0, 1
+}
+
+// For non-periodic x (inflow/outflow), use:
+// periodic_dimension = 0, 1  // and define velocity BCs below
+
+VelocityBcCoefs_0 {
+   // x-velocity boundary conditions
+   // Left boundary (inflow): u = U_inf
+   acoef_function_0 = "1.0"
+   bcoef_function_0 = "0.0"
+   gcoef_function_0 = "1.0"   // U_inf = 1.0
+
+   // Right boundary (outflow): convective BC ∂u/∂x = 0
+   acoef_function_1 = "0.0"
+   bcoef_function_1 = "1.0"
+   gcoef_function_1 = "0.0"
+
+   // y-boundaries (periodic, these won't be used)
+   acoef_function_2 = "1.0"
+   bcoef_function_2 = "0.0"
+   gcoef_function_2 = "0.0"
+
+   acoef_function_3 = "1.0"
+   bcoef_function_3 = "0.0"
+   gcoef_function_3 = "0.0"
+}
+
+VelocityBcCoefs_1 {
+   // y-velocity boundary conditions
+   // Left boundary: v = 0 (no cross-flow)
+   acoef_function_0 = "1.0"
+   bcoef_function_0 = "0.0"
+   gcoef_function_0 = "0.0"
+
+   // Right boundary: ∂v/∂x = 0
+   acoef_function_1 = "0.0"
+   bcoef_function_1 = "1.0"
+   gcoef_function_1 = "0.0"
+
+   // y-boundaries (periodic)
+   acoef_function_2 = "1.0"
+   bcoef_function_2 = "0.0"
+   gcoef_function_2 = "0.0"
+
+   acoef_function_3 = "1.0"
+   bcoef_function_3 = "0.0"
+   gcoef_function_3 = "0.0"
+}
+
+// =============================================================================
+// GRIDDING AND AMR
+// =============================================================================
+GriddingAlgorithm {
+   max_levels = MAX_LEVELS
+
+   ratio_to_coarser {
+      level_1 = REF_RATIO
+      level_2 = REF_RATIO
+   }
+
+   largest_patch_size {
+      level_0 = 512, 512
+   }
+
+   smallest_patch_size {
+      level_0 = 8, 8
+   }
+
+   efficiency_tolerance = 0.85
+   combine_efficiency = 0.85
+}
+
+StandardTagAndInitialize {
+   tagging_method = "GRADIENT_DETECTOR"
+}
+
+LoadBalancer {
+   bin_pack_method = "SPATIAL"
+   max_workload_factor = 1.0
+}
+
+// =============================================================================
+// VISUALIZATION OUTPUT
+// =============================================================================
+VisItDataWriter {
+   dirname = "viz_odor_plume"
+   visit_number_procs_per_file = 1
+}
+
+// =============================================================================
+// TIMERS AND LOGGING
+// =============================================================================
+TimerManager {
+   print_total = TRUE
+   print_threshold = 0.01
+   timer_list = "IBAMR::*::*", "IBTK::*::*", "*::*::*"
+}
+
+Main {
+   // Logging
+   log_file_name = "odor_plume_lei.log"
+   log_all_nodes = FALSE
+
+   // Visualization
+   viz_writer = "VisIt"
+   viz_dump_interval = 50            // Output every 50 timesteps
+   viz_dump_dirname = "viz_odor_plume"
+
+   // Restart
+   restart_dump_interval = 500       // Restart every 500 timesteps
+   restart_dump_dirname = "restart_odor_plume"
+
+   // Timer
+   timer_dump_interval = 100
+}
