@@ -24,6 +24,7 @@
 #include <StandardTagAndInitialize.h>
 
 // Headers for application-specific algorithm/data structure objects
+#include <ibamr/AdvDiffHierarchyIntegrator.h>
 #include <ibamr/ConstraintIBMethod.h>
 #include <ibamr/IBExplicitHierarchyIntegrator.h>
 #include <ibamr/IBHydrodynamicForceEvaluator.h>
@@ -106,6 +107,15 @@ main(int argc, char* argv[])
             "INSStaggeredHierarchyIntegrator",
             app_initializer->getComponentDatabase("INSStaggeredHierarchyIntegrator"));
 
+        // Create odor transport integrator (advection-diffusion solver)
+        Pointer<AdvDiffHierarchyIntegrator> adv_diff_integrator = new AdvDiffHierarchyIntegrator(
+            "AdvDiffHierarchyIntegrator",
+            app_initializer->getComponentDatabase("AdvDiffHierarchyIntegrator"));
+
+        // Register advection velocity (provided by Navier-Stokes solver)
+        adv_diff_integrator->setAdvectionVelocity(navier_stokes_integrator->getAdvectionVelocityVariable());
+        navier_stokes_integrator->registerAdvDiffHierarchyIntegrator(adv_diff_integrator);
+
         const int num_structures = input_db->getIntegerWithDefault("num_structures", 1);
         Pointer<ConstraintIBMethod> ib_method_ops = new ConstraintIBMethod(
             "ConstraintIBMethod", app_initializer->getComponentDatabase("ConstraintIBMethod"), num_structures);
@@ -155,6 +165,14 @@ main(int argc, char* argv[])
             navier_stokes_integrator->registerPressureInitialConditions(p_init);
         }
 
+        // Create odor concentration initial condition (Gaussian source)
+        if (input_db->keyExists("OdorInitialConditions"))
+        {
+            Pointer<CartGridFunction> C_init = new muParserCartGridFunction(
+                "C_init", app_initializer->getComponentDatabase("OdorInitialConditions"), grid_geometry);
+            adv_diff_integrator->setInitialConditions(C_init);
+        }
+
         // Create Eulerian boundary condition specification objects (when necessary).
         const IntVector<NDIM>& periodic_shift = grid_geometry->getPeriodicShift();
         vector<RobinBcCoefStrategy<NDIM>*> u_bc_coefs(NDIM);
@@ -179,6 +197,15 @@ main(int argc, char* argv[])
             navier_stokes_integrator->registerPhysicalBoundaryConditions(u_bc_coefs);
         }
 
+        // Create odor concentration boundary conditions
+        RobinBcCoefStrategy<NDIM>* C_bc_coef = nullptr;
+        if (!(periodic_shift.min() > 0) && input_db->keyExists("OdorBcCoefs"))
+        {
+            C_bc_coef = new muParserRobinBcCoefs(
+                "C_bc_coef", app_initializer->getComponentDatabase("OdorBcCoefs"), grid_geometry);
+            adv_diff_integrator->setPhysicalBcCoef(C_bc_coef);
+        }
+
         // Create Eulerian body force function specification objects.
         if (input_db->keyExists("ForcingFunction"))
         {
@@ -195,6 +222,7 @@ main(int argc, char* argv[])
             ib_initializer->registerLSiloDataWriter(silo_data_writer);
             ib_method_ops->registerLSiloDataWriter(silo_data_writer);
             time_integrator->registerVisItDataWriter(visit_data_writer);
+            adv_diff_integrator->registerVisItDataWriter(visit_data_writer);
         }
 
         // Initialize hierarchy configuration and data on all patches.
@@ -548,6 +576,7 @@ main(int argc, char* argv[])
         // Cleanup Eulerian boundary condition specification objects (when
         // necessary).
         for (unsigned int d = 0; d < NDIM; ++d) delete u_bc_coefs[d];
+        delete C_bc_coef;
 
     } // cleanup dynamically allocated objects prior to shutdown
 } // main
