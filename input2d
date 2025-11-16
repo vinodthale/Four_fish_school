@@ -13,6 +13,10 @@ Re = 5609.0
 MU = 0.785/Re
 RHO = 1.0
 
+// Odor transport parameters
+KAPPA = 1.0e-3  // Diffusion coefficient (molecular diffusivity)
+SCHMIDT = MU / (RHO * KAPPA)  // Schmidt number Sc = nu/D
+
 // Grid spacing parameters
 MAX_LEVELS = 3
 REF_RATIO  = 4
@@ -312,6 +316,92 @@ INSStaggeredHierarchyIntegrator {
          enable_logging        = FALSE
       }
    }
+}
+
+// =============================================================================
+// ODOR TRANSPORT (ADVECTION-DIFFUSION) INTEGRATOR
+// =============================================================================
+// Solves: ∂C/∂t + u·∇C = κ∇²C
+// where C = odor concentration, u = fluid velocity, κ = diffusion coefficient
+AdvDiffHierarchyIntegrator {
+   start_time                    = START_TIME
+   end_time                      = END_TIME
+   grow_dt                       = GROW_DT
+   convective_op_type            = CONVECTIVE_OP_TYPE
+   convective_difference_form    = CONVECTIVE_FORM
+   cfl                           = CFL_MAX
+   dt_max                        = DT_MAX
+   enable_logging                = ENABLE_LOGGING
+   max_integrator_steps          = MAX_INTEGRATOR_STEPS
+   explicitly_remove_nullspace   = FALSE
+   diffusion_time_stepping_type  = "BACKWARD_EULER"  // Implicit for stability
+   convective_time_stepping_type = "ADAMS_BASHFORTH" // Explicit 2nd-order
+
+   HelmholtzHypreSolver {
+      solver_type           = "PFMG"
+      rap_type              = 0
+      relax_type            = 2
+      skip_relax            = 1
+      num_pre_relax_steps   = 2
+      num_post_relax_steps  = 2
+      relative_residual_tol = 1.0e-6
+      max_iterations        = 100
+      enable_logging        = FALSE
+   }
+
+   HelmholtzFACSolver {
+      num_pre_sweeps  = 0
+      num_post_sweeps = 3
+      coarse_solver_choice = "hypre"
+      coarse_solver_tolerance = 1.0e-12
+      coarse_solver_max_iterations = 1
+      prolongation_method = "LINEAR_REFINE"
+      restriction_method  = "CONSERVATIVE_COARSEN"
+      hypre_solver {
+         solver_type           = "PFMG"
+         rap_type              = 0
+         relax_type            = 2
+         skip_relax            = 1
+         num_pre_relax_steps   = 0
+         num_post_relax_steps  = 3
+         relative_residual_tol = 1.0e-12
+         max_iterations        = 1
+         enable_logging        = FALSE
+      }
+   }
+}
+
+// =============================================================================
+// ODOR INITIAL CONDITIONS: Gaussian point source
+// =============================================================================
+// Gaussian blob: C(x,y,t=0) = A * exp(-((x-x0)²+(y-y0)²)/(2σ²))
+// Source location: (x0, y0) = (0.0, 0.0) - center of domain
+// Width: σ = 0.5 (compact support)
+// Amplitude: A = 1.0 (normalized concentration)
+OdorInitialConditions {
+   function_0 = "1.0 * exp(-((X_0-0.0)^2 + (X_1-0.0)^2) / (2.0 * 0.5^2))"
+}
+
+// =============================================================================
+// ODOR BOUNDARY CONDITIONS (only used if domain is non-periodic)
+// =============================================================================
+// Robin BC: a*C + b*∂C/∂n = g
+// No-flux (Neumann): a=0, b=1, g=0 → ∂C/∂n = 0
+OdorBcCoefs {
+   acoef_function_0 = "0.0"  // Left boundary
+   acoef_function_1 = "0.0"  // Right boundary
+   acoef_function_2 = "0.0"  // Bottom boundary
+   acoef_function_3 = "0.0"  // Top boundary
+
+   bcoef_function_0 = "1.0"
+   bcoef_function_1 = "1.0"
+   bcoef_function_2 = "1.0"
+   bcoef_function_3 = "1.0"
+
+   gcoef_function_0 = "0.0"
+   gcoef_function_1 = "0.0"
+   gcoef_function_2 = "0.0"
+   gcoef_function_3 = "0.0"
 }
 
 Main {
