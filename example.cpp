@@ -173,6 +173,14 @@ main(int argc, char* argv[])
             adv_diff_integrator->setInitialConditions(C_init);
         }
 
+        // Create odor source term (continuous release from spherical source)
+        if (input_db->keyExists("OdorSourceTerm"))
+        {
+            Pointer<CartGridFunction> C_source = new muParserCartGridFunction(
+                "C_source", app_initializer->getComponentDatabase("OdorSourceTerm"), grid_geometry);
+            adv_diff_integrator->setSourceTerm(C_source);
+        }
+
         // Create Eulerian boundary condition specification objects (when necessary).
         const IntVector<NDIM>& periodic_shift = grid_geometry->getPeriodicShift();
         vector<RobinBcCoefStrategy<NDIM>*> u_bc_coefs(NDIM);
