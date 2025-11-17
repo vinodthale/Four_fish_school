@@ -1,7 +1,14 @@
-// Test 10: Moving Immersed Boundary
-// Validates IB-scalar coupling with moving ellipsoid
+// Test 10: IB-Scalar Coupling Validation
+// Validates immersed boundary coupling with scalar transport
+// Simulates fish odor emission using IB boundary source
 
 diffusion_coefficient = 0.001
+
+// IB parameters
+ib_x_center = 0.0
+ib_y_center = 0.0
+ib_radius = 0.2
+ib_source_strength = 0.1
 
 CartesianGeometry {
    domain_boxes = [ (0,0) , (63,63) ]
@@ -22,8 +29,6 @@ Main {
    START_TIME = 0.0
    END_TIME = 1.0
 }
-
-// TODO: Add test-specific configuration
 
 INSStaggeredHierarchyIntegrator {
    mu = 0.01
