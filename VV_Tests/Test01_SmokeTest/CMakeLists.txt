@@ -1,0 +1,18 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+
+PROJECT(VV_Test01_SmokeTest CXX)
+
+# Find IBAMR
+FIND_PACKAGE(IBAMR REQUIRED)
+
+# Create executable
+ADD_EXECUTABLE(test01_scalar_only test01_scalar_only.cpp)
+
+# Link IBAMR libraries
+TARGET_LINK_LIBRARIES(test01_scalar_only IBAMR::IBAMR2d)
+
+# Set C++ standard
+SET_TARGET_PROPERTIES(test01_scalar_only PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED ON
+)

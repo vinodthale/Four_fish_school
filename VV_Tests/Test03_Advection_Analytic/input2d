@@ -1,0 +1,71 @@
+
+// Test 3: Pure Advection
+MU = 1.0e-2
+RHO = 1.0
+KAPPA = 1.0e-8  // Minimal diffusion
+
+MAX_LEVELS = 1
+N = 64
+
+START_TIME = 0.0
+END_TIME = 10.0  // One period
+DT_MAX = 0.01
+CFL_MAX = 0.5
+
+U_ADVECTION = 1.0  // Constant velocity
+
+Main {
+   log_file_name = "test03.log"
+   viz_writer = "VisIt"
+   viz_dump_interval = 50
+   viz_dump_dirname = "viz_test03"
+}
+
+CartesianGeometry {
+   domain_boxes = [(0,0), (10*N-1, N-1)]
+   x_lo = 0.0, 0.0
+   x_up = 10.0, 1.0
+   periodic_dimension = 1, 1  // PERIODIC
+}
+
+GriddingAlgorithm {
+   max_levels = MAX_LEVELS
+   largest_patch_size { level_0 = 512, 512 }
+   smallest_patch_size { level_0 = 8, 8 }
+}
+
+StandardTagAndInitialize { tagging_method = "GRADIENT_DETECTOR" }
+LoadBalancer { bin_pack_method = "SPATIAL" }
+
+INSStaggeredHierarchyIntegrator {
+   mu = MU
+   rho = RHO
+   start_time = START_TIME
+   end_time = END_TIME
+   cfl = CFL_MAX
+   dt_max = DT_MAX
+}
+
+// Prescribed constant velocity
+VelocityInitialConditions {
+   function_0 = "1.0"  // U
+   function_1 = "0.0"  // V
+}
+
+AdvDiffHierarchyIntegrator {
+   start_time = START_TIME
+   end_time = END_TIME
+   cfl = CFL_MAX
+   dt_max = DT_MAX
+   diffusion_time_stepping_type = "BACKWARD_EULER"
+   convective_time_stepping_type = "ADAMS_BASHFORTH"
+   convective_op_type = "PPM"  // Try CENTERED, PPM
+   convective_difference_form = "CONSERVATIVE"
+}
+
+// Initial: sine wave
+OdorInitialConditions {
+   function_0 = "sin(2.0*3.14159265359*X_0)"
+}
+
+diffusion_coefficient = KAPPA
