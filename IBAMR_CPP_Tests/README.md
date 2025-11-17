@@ -397,7 +397,7 @@ export CMAKE_PREFIX_PATH=$SAMRAI_ROOT:$CMAKE_PREFIX_PATH
 
 ### Related Repositories
 - Parent repo: Four_fish_school
-- Python V&V suite: `../VV_Tests/`
+- IBAMR framework: https://github.com/IBAMR/IBAMR
 
 ## Quick Start
 
