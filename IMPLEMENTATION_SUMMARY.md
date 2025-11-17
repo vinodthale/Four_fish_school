@@ -15,18 +15,18 @@
 - **Framework:** All 14 tests have directory structure and templates ✅
 
 ### ⏳ What's Remaining
-- **Implementation:** 9/14 tests complete (64% done) - **MVP + 4 tests COMPLETE!** 🎉
-- **Core verification:** ✅ MVP + Advection + Discontinuous + Time-step + Long-run
-- **Remaining:** 5 tests for advanced features (BCs, IB, AMR, sphere source, benchmarks)
-- **Production:** Ready for enhanced use NOW; full suite for advanced features
+- **Implementation:** 11/14 tests complete (79% done) - **MVP + 6 tests COMPLETE!** 🎉
+- **Core verification:** ✅ MVP + Advection + Discontinuous + BCs + Sphere + Time-step + Long-run
+- **Remaining:** 3 tests for advanced features (IB, AMR, benchmarks)
+- **Production:** Ready for comprehensive use NOW; full suite nearly complete
 
-### 🎯 Production Readiness: 🟢 **PRODUCTION READY (64% Complete)**
+### 🎯 Production Readiness: 🟢 **PRODUCTION READY (79% Complete)**
 
 **MVP Status:** ✅ **100% COMPLETE** (Tests 01, 02, 04, 06, 09)
-**Additional tests:** ✅ **Test03** (advection), **Test05** (discontinuous), **Test12** (temporal), **Test13** (long-run)
-**Current capability:** Production use enabled with comprehensive stability validation
-**Remaining for full suite:** Tests 07-08, 10-11, 14 (~1,400 lines)
-**Estimated to completion:** Implementing remaining 5 tests now!
+**Additional tests:** ✅ **Test03** (advection), **Test05** (discontinuous), **Test07** (BCs), **Test08** (sphere source), **Test12** (temporal), **Test13** (long-run)
+**Current capability:** Production use enabled with comprehensive validation including BCs and literature comparison
+**Remaining for full suite:** Tests 10-11, 14 (~600 lines)
+**Estimated to completion:** Implementing final 3 advanced tests now!
 
 ---
 
@@ -40,8 +40,8 @@
 | 4 | MMS | 380 | ✅ DONE | 🔴 YES | - |
 | 5 | Discontinuous | 364 | ✅ DONE | Low | ✅ |
 | 6 | Mass Conservation | 341 | ✅ DONE | 🔴 YES | - |
-| 7 | Boundary Conditions | 67 | ⏳ Template | Medium | In progress |
-| 8 | Sphere Source | 67 | ⏳ Template | Medium | In progress |
+| 7 | Boundary Conditions | 357 | ✅ DONE | Medium | ✅ |
+| 8 | Sphere Source | 417 | ✅ DONE | Medium | ✅ |
 | 9 | High Schmidt | 351 | ✅ DONE | 🔴 YES | - |
 | 10 | Moving IB | 67 | ⏳ Template | High | In progress |
 | 11 | AMR | 67 | ⏳ Template | High | In progress |
@@ -49,9 +49,9 @@
 | 13 | Long Run | 389 | ✅ DONE | Low | ✅ |
 | 14 | Benchmarks | 67 | ⏳ Template | High | In progress |
 
-**Total implemented:** 3,401 lines (MVP + Tests 03,05,12,13) ✅
-**Progress:** 9/14 tests complete (64% - **PRODUCTION READY**)
-**Currently implementing:** Tests 07-08, 10-11, 14 (~1,400 lines)
+**Total implemented:** 4,175 lines (MVP + Tests 03,05,07-08,12-13) ✅
+**Progress:** 11/14 tests complete (79% - **PRODUCTION READY**)
+**Currently implementing:** Tests 10-11, 14 (final 3 tests, ~600 lines)
 
 ---
 
