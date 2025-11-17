@@ -1,5 +1,6 @@
 // Test 11: AMR Sensitivity
 // Tests for adaptive mesh refinement artifacts
+// Validates AMR consistency and checks for refinement artifacts
 
 diffusion_coefficient = 0.001
 
@@ -23,8 +24,6 @@ Main {
    END_TIME = 1.0
 }
 
-// TODO: Add test-specific configuration
-
 INSStaggeredHierarchyIntegrator {
    mu = 0.01
    rho = 1.0
@@ -41,11 +40,26 @@ AdvDiffHierarchyIntegrator {
 }
 
 GriddingAlgorithm {
-   max_levels = 1
+   max_levels = 3
+   ratio_to_coarser {
+      level_1 = 2, 2
+      level_2 = 2, 2
+   }
+   largest_patch_size {
+      level_0 = 512, 512
+   }
+   smallest_patch_size {
+      level_0 = 8, 8
+   }
 }
 
 StandardTagAndInitialize {
-   tagging_method = "REFINE_BOXES"
+   tagging_method = "GRADIENT_DETECTOR"
+   RefineBoxes {
+      // Refine center region where Gaussian is located
+      level_0 = [( 24 , 24 ),( 39 , 39 )]
+      level_1 = [( 52 , 52 ),( 75 , 75 )]
+   }
 }
 
 LoadBalancer {
