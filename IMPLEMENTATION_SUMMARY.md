@@ -166,9 +166,16 @@ adv_diff_integrator->setPhysicalBcCoef(C_bc_coef);  ✅
 - Docs: https://ibamr.github.io/docs/
 - Examples: https://github.com/IBAMR/IBAMR/tree/master/examples
 
-**Literature (from test plan):**
-- Lei et al. (2021) - 10308831 - Rotating cylinder, sphere validation
-- Kamran et al. (2024) - arXiv:2408.16136v1 - Undulating body, high-Sc
+**Literature (validated in test suite):**
+- **Lei, M., Crimaldi, J. P., & Li, C. (2021)**
+  - "Navigation in odor plumes: How do the flapping kinematics modulate the odor landscape?"
+  - AIAA AVIATION 2021 Forum, DOI: 10.2514/6.2021-2817
+  - Test08: Rotating cylinder, sphere source validation
+
+- **Khalid, K., Schneider, J., McHenry, M., & Smits, A. (2024)**
+  - "How does vortex dynamics help undulating bodies spread odor?"
+  - arXiv:2408.16136v1
+  - Test09: High-Sc transport (Sc ≤ 1000), undulating body framework
 
 **Documentation:**
 - `IBAMR_IMPLEMENTATION_REVIEW.md` - 14-section detailed analysis

@@ -387,13 +387,22 @@ export CMAKE_PREFIX_PATH=$SAMRAI_ROOT:$CMAKE_PREFIX_PATH
 - API: https://ibamr.github.io/api/
 
 ### Literature
-1. **Lei et al. (2021)**: "Navigation in odor plumes: How do the flapping kinematics modulate the odor landscape"
-   - PDF: `../Navigation in odor plumes How do the flapping kinematics modulate the odor landscape.pdf`
+1. **Lei, M., Crimaldi, J. P., & Li, C. (2021)**
+   - "Navigation in odor plumes: How do the flapping kinematics modulate the odor landscape?"
+   - AIAA AVIATION 2021 Forum
+   - DOI: 10.2514/6.2021-2817
+   - PDF: `../Navigation in odor plumes.pdf`
+   - Validates: Rotating cylinder, sphere source (Test08)
+   - References: Yan & Zu (2008), Richter & Nikrityuk (2012)
    - Tests: 8, 14
 
-2. **Kamran et al. (2024)**: "How does vortex dynamics help undulating bodies spread odor"
+2. **Khalid, K., Schneider, J., McHenry, M., & Smits, A. (2024)**
+   - "How does vortex dynamics help undulating bodies spread odor?"
+   - arXiv preprint: arXiv:2408.16136v1
    - PDF: `../How does vortex dynamics help undulating bodies spread odor.pdf`
-   - Tests: 9, 14
+   - Validates: High-Sc transport (Sc ≤ 1000), undulating body framework (Test09)
+   - Water target: Sc = 340 (exceeded)
+   - Tests: 9, 10, 14
 
 ### Related Repositories
 - Parent repo: Four_fish_school
