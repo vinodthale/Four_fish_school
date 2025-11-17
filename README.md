@@ -70,7 +70,7 @@ Where:
 
 ```
 Four_fish_school/
-├── example.cpp                    # Main simulation program
+├── example.cpp                    # Main simulation program (NS + IB + Odor)
 ├── IBEELKinematics.cpp            # Fish kinematics implementation
 ├── IBEELKinematics.h              # Kinematics class header
 ├── input2d                        # IBAMR input configuration
@@ -82,7 +82,11 @@ Four_fish_school/
 ├── generate_4fish_vertices.py     # Script to generate fish positions
 ├── plot_eel_only.py               # Visualization: fish only
 ├── plot_combined_fluid_eel.py     # Visualization: fish + fluid
-└── test_odor_transport_vortex_dynamics.py  # Analysis script
+├── plot_odor_concentration.py     # Visualization: odor concentration field
+├── analyze_odor_plumes.py         # Analysis: odor plume statistics
+├── test_odor_transport_vortex_dynamics.py  # Validation script
+├── README_ODOR_DYNAMICS.md        # Detailed odor transport documentation
+└── *.pdf                          # Research papers (see References)
 ```
 
 ## Building the Simulation
@@ -247,6 +251,50 @@ The simulation computes for each fish:
 
 Data written to `Eel2dStr/Eel2d.curve`.
 
+## Odor Transport Dynamics
+
+This simulation includes **passive scalar transport** to model odor advection-diffusion coupled with fish swimming. The odor field C(x,y,t) satisfies:
+
+```
+∂C/∂t + u·∇C = κ∇²C + S(x,y,t)
+```
+
+### Key Features
+
+- **Advection-Diffusion Solver**: IBAMR's `AdvDiffHierarchyIntegrator`
+- **Coupling**: One-way (fluid affects odor, odor doesn't affect fluid)
+- **Source Term**: Continuous Gaussian source at (-2.0, 0.0)
+- **Schmidt Number**: Sc = ν/κ (configurable)
+- **Visualization**: Odor contours, vortex-odor interaction
+
+### Physical Parameters
+
+```
+KAPPA = 1.0e-3              # Molecular diffusivity
+SCHMIDT = MU / (RHO * KAPPA)  # Schmidt number
+```
+
+### Odor Visualization
+
+```bash
+# Visualize odor concentration at iteration 200
+python plot_odor_concentration.py 200
+
+# Analyze odor plume statistics
+python analyze_odor_plumes.py --stats
+
+# Single iteration analysis
+python analyze_odor_plumes.py 200
+```
+
+### Output Fields
+
+- **C**: Odor concentration (normalized C* = (C-C_l)/(C_h-C_l))
+- **∇C**: Concentration gradient (odor sharpness)
+- **Mixing efficiency**: Vortex-enhanced spreading metric
+
+**See [README_ODOR_DYNAMICS.md](README_ODOR_DYNAMICS.md) for complete documentation.**
+
 ## Visualization
 
 ### Using Python Scripts
@@ -274,6 +322,8 @@ Recommended pseudocolor plots:
 
 ### References
 
+#### Fish Swimming and Hydrodynamics
+
 1. **Bhalla et al. (2013)**: "A unified mathematical framework and an adaptive numerical method for fluid-structure interaction with rigid, deforming, and elastic bodies." *Journal of Computational Physics*, 250:446-476.
    - Eel kinematics model used in this simulation
 
@@ -282,6 +332,20 @@ Recommended pseudocolor plots:
 
 3. **Griffith & Patankar (2020)**: "Immersed Methods for Fluid-Structure Interaction." *Annual Review of Fluid Mechanics*, 52:421-448.
    - Review of IB methods in FSI
+
+#### Odor Transport and Vortex Dynamics
+
+4. **"How does vortex dynamics help undulating bodies spread odor.pdf"** (included in repository)
+   - Vortex-enhanced odor spreading mechanisms
+   - Flapping kinematics effects on mixing
+   - Quantification of mixing efficiency
+   - *Directly applicable to this simulation's odor transport module*
+
+5. **"Navigation in odor plumes How do the flapping kinematics modulate the odor landscape.pdf"** (included in repository)
+   - Odor landscape structure in fish wakes
+   - Effects of schooling formations on odor plumes
+   - Sensory information content in turbulent odor fields
+   - *Provides context for analyzing simulation results*
 
 ### Fish Schooling Hydrodynamics
 

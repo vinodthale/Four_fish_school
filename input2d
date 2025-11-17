@@ -383,6 +383,20 @@ OdorInitialConditions {
 }
 
 // =============================================================================
+// ODOR SOURCE TERM: Continuous spherical source (mimics AIAA paper)
+// =============================================================================
+// Adds a continuous odor release from a spherical region
+// Source: S(x,y,t) = Q * exp(-((x-xs)²+(y-ys)²)/rs²)
+// Parameters:
+//   Q = 10.0 (source strength - maintains high concentration)
+//   (xs, ys) = (-2.0, 0.0) (source location - upstream of fish school)
+//   rs = 0.2 (source radius)
+// This mimics Dirichlet BC C=Ch at sphere surface
+OdorSourceTerm {
+   function_0 = "10.0 * exp(-((X_0-(-2.0))^2 + (X_1-0.0)^2) / (0.2^2))"
+}
+
+// =============================================================================
 // ODOR BOUNDARY CONDITIONS (only used if domain is non-periodic)
 // =============================================================================
 // Robin BC: a*C + b*∂C/∂n = g
