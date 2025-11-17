@@ -107,10 +107,25 @@ IBAMR_CPP_Tests/
 │   ├── CMakeLists.txt
 │   └── README.md
 │
-└── Test14_Benchmarks/                 ← Literature comparisons
+├── Test14_Benchmarks/                 ← Literature comparisons
+│   ├── main.cpp
+│   ├── input2d
+│   ├── CMakeLists.txt
+│   └── README.md
+│
+├── Test15_RotatingCylinder/           ← Lei et al. validation: Rotating cylinder
+│   ├── main.cpp
+│   ├── input2d
+│   └── README.md
+│
+├── Test16_3DSphere/                   ← Lei et al. validation: 3D sphere/cube
+│   ├── main.cpp
+│   ├── input3d_sphere
+│   └── README.md
+│
+└── Test17_PitchPlunge/                ← Lei et al. validation: Full case
     ├── main.cpp
     ├── input2d
-    ├── CMakeLists.txt
     └── README.md
 ```
 
@@ -132,6 +147,9 @@ IBAMR_CPP_Tests/
 | 12 | Time-step CFL | Temporal convergence | Convergence rate ≈ 2.0 |
 | 13 | Long Run | Periodic conservation checks | No drift over time |
 | 14 | Benchmarks | Literature comparisons | Match Lei/Kamran data |
+| **15** | **Rotating Cylinder** | **Yan & Zu (2008) validation** | **Streamlines + scalar match ±10%** |
+| **16** | **3D Sphere** | **Richter & Nikrityuk (2012)** | **Nu within ±15%, contours match** |
+| **17** | **Pitch-Plunge** | **Lei et al. (2021) full case** | **PDF shape, vortex street** |
 
 ## Building the Tests
 
@@ -276,6 +294,34 @@ These tests validate production readiness.
 - Kamran et al. (2024): Undulating body
 - Expected: Match published data
 
+### Tier 4: Literature Validation (Tests 15-17)
+These tests implement the exact validation cases from Lei et al. (2021) Section II.B.
+
+**Test 15: Rotating Cylinder (Yan & Zu 2008)**
+- Validates scalar transport around rotating isothermal cylinder
+- Parameters: Re=200, Pr=0.5, k=0.5 (rotation V/U)
+- Reference: Yan & Zu (2008) LBM heat transfer benchmark
+- Expected: Streamlines + scalar contours match published Figure 2
+- See: `LEI_VALIDATION_MAPPING.md` for full details
+
+**Test 16: 3D Sphere & Cube (Richter & Nikrityuk 2012)**
+- Validates 3D scalar transport around stationary sphere/cube
+- Parameters: Re=200, Pr=0.744
+- Reference: Richter & Nikrityuk (2012) CFD benchmark
+- Expected: Thermal BL, wake structure, Nusselt number within ±15%
+- **Note:** 3D simulation - high computational cost (~4 hours on 16 cores)
+- See: `LEI_VALIDATION_MAPPING.md` for full details
+
+**Test 17: Pitch-Plunge Odor Plume (Lei et al. 2021)**
+- **FULL PRODUCTION CASE** from Lei et al. (2021)
+- Upstream sphere source + downstream flapping ellipsoidal airfoil
+- Parameters: Re=200, Sc=0.71, St=0.9
+- Kinematics: y(t) = (L/2)sin(2πft), θ(t) = (1/6)cos(2πft)
+- Expected: Inverse von Kármán street, odor PDF shape, vortex-odor interaction
+- Validates: Figures 6-10 in Lei et al. (2021)
+- **Note:** Time-dependent, requires multiple flapping periods (~4 hours 2D)
+- See: `LEI_VALIDATION_MAPPING.md` for complete parameter extraction
+
 ## Output and Results
 
 Each test produces:
@@ -389,11 +435,20 @@ export CMAKE_PREFIX_PATH=$SAMRAI_ROOT:$CMAKE_PREFIX_PATH
 ### Literature
 1. **Lei et al. (2021)**: "Navigation in odor plumes: How do the flapping kinematics modulate the odor landscape"
    - PDF: `../Navigation in odor plumes How do the flapping kinematics modulate the odor landscape.pdf`
-   - Tests: 8, 14
+   - Tests: 8, 14, **15, 16, 17**
+   - **Full parameter extraction:** `LEI_VALIDATION_MAPPING.md`
 
 2. **Kamran et al. (2024)**: "How does vortex dynamics help undulating bodies spread odor"
    - PDF: `../How does vortex dynamics help undulating bodies spread odor.pdf`
    - Tests: 9, 14
+
+3. **Yan & Zu (2008)**: "Numerical simulation of heat transfer and fluid flow past a rotating isothermal cylinder – A LBM approach"
+   - Reference for Test15
+   - DOI: 10.1016/j.ijheatmasstransfer.2007.07.053
+
+4. **Richter & Nikrityuk (2012)**: "Drag forces and heat transfer coefficients for spherical, cuboidal and ellipsoidal particles"
+   - Reference for Test16
+   - DOI: 10.1016/j.ijheatmasstransfer.2011.09.005
 
 ### Related Repositories
 - Parent repo: Four_fish_school
@@ -421,6 +476,7 @@ export CMAKE_PREFIX_PATH=$SAMRAI_ROOT:$CMAKE_PREFIX_PATH
 
 ## Development Status
 
+### Core Tests (1-14)
 - [x] Directory structure created
 - [ ] Common utilities implemented
 - [ ] Test 1: Smoke Test
@@ -437,6 +493,15 @@ export CMAKE_PREFIX_PATH=$SAMRAI_ROOT:$CMAKE_PREFIX_PATH
 - [ ] Test 12: Time-step
 - [ ] Test 13: Long Run
 - [ ] Test 14: Benchmarks
+
+### Literature Validation Tests (15-17) ✨ NEW
+- [x] **Test 15: Rotating Cylinder** (Yan & Zu 2008) - Template created
+- [x] **Test 16: 3D Sphere** (Richter & Nikrityuk 2012) - Template created
+- [x] **Test 17: Pitch-Plunge** (Lei et al. 2021 full case) - Template created
+- [x] **Validation mapping document** (`LEI_VALIDATION_MAPPING.md`)
+- [ ] Test15 executed and validated
+- [ ] Test16 executed and validated
+- [ ] Test17 executed and validated
 
 ## Contributing
 

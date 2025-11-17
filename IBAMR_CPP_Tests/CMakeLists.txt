@@ -9,9 +9,10 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Options
-option(BUILD_ALL_TESTS "Build all 14 tests" ON)
+option(BUILD_ALL_TESTS "Build all tests (1-17)" ON)
 option(BUILD_TIER1_ONLY "Build only Tier 1 tests (1-6)" OFF)
 option(BUILD_TIER2_ONLY "Build only Tier 2 tests (7-10)" OFF)
+option(BUILD_LITERATURE_ONLY "Build only Literature Validation tests (15-17)" OFF)
 
 # Find IBAMR
 if(NOT DEFINED IBAMR_ROOT)
@@ -97,13 +98,21 @@ set(TIER3_TESTS
     test14_benchmarks
 )
 
+set(LITERATURE_VALIDATION_TESTS
+    test15_rotating_cylinder
+    test16_3d_sphere
+    test17_pitch_plunge
+)
+
 # Build tests based on options
 if(BUILD_TIER1_ONLY)
     set(TESTS_TO_BUILD ${TIER1_TESTS})
 elseif(BUILD_TIER2_ONLY)
     set(TESTS_TO_BUILD ${TIER2_TESTS})
+elseif(BUILD_LITERATURE_ONLY)
+    set(TESTS_TO_BUILD ${LITERATURE_VALIDATION_TESTS})
 elseif(BUILD_ALL_TESTS)
-    set(TESTS_TO_BUILD ${TIER1_TESTS} ${TIER2_TESTS} ${TIER3_TESTS})
+    set(TESTS_TO_BUILD ${TIER1_TESTS} ${TIER2_TESTS} ${TIER3_TESTS} ${LITERATURE_VALIDATION_TESTS})
 else()
     set(TESTS_TO_BUILD ${TIER1_TESTS})
 endif()
@@ -139,6 +148,12 @@ foreach(TEST ${TESTS_TO_BUILD})
         add_ibamr_test(${TEST} Test13_LongRun)
     elseif(TEST STREQUAL "test14_benchmarks")
         add_ibamr_test(${TEST} Test14_Benchmarks)
+    elseif(TEST STREQUAL "test15_rotating_cylinder")
+        add_ibamr_test(${TEST} Test15_RotatingCylinder)
+    elseif(TEST STREQUAL "test16_3d_sphere")
+        add_ibamr_test(${TEST} Test16_3DSphere)
+    elseif(TEST STREQUAL "test17_pitch_plunge")
+        add_ibamr_test(${TEST} Test17_PitchPlunge)
     endif()
 endforeach()
 
