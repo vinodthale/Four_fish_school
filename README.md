@@ -1,412 +1,450 @@
-# Four Fish School Simulation - IBAMR Implementation
+# Four Fish School - Odor Plume Navigation Simulation
 
 ## Overview
 
-This project implements a 2D fluid-structure interaction simulation of four fish swimming in a rectangular school formation using **IBAMR** (Immersed Boundary Adaptive Mesh Refinement). The simulation captures the complex hydrodynamic interactions between multiple self-propelled swimmers and the surrounding fluid.
+This repository contains multiple implementations for simulating fish schooling behavior with odor plume dynamics using the Immersed Boundary Method (IBAMR framework). The simulation couples fluid dynamics, immersed boundaries (fish), and scalar transport (odor concentration).
 
-## What is IBAMR?
+## 📂 Repository Organization
 
-**IBAMR** is an open-source software framework for solving fluid-structure interaction (FSI) problems using the immersed boundary (IB) method with adaptive mesh refinement (AMR). It enables high-resolution simulations of deformable and rigid bodies interacting with incompressible viscous fluids.
+This repository is organized into **four main implementations**, each serving different purposes:
 
-- **Website**: https://ibamr.github.io/
-- **Documentation**: https://ibamr.github.io/docs
-- **Repository**: https://github.com/IBAMR/IBAMR
-
-### Key Features Used in This Project
-
-- **Immersed Boundary Method**: Fluid-structure coupling without body-fitted meshes
-- **Adaptive Mesh Refinement**: Automatic grid refinement near fish bodies
-- **ConstraintIBMethod**: Kinematically prescribed body motions
-- **INSStaggeredHierarchyIntegrator**: Incompressible Navier-Stokes solver
-- **IBHydrodynamicForceEvaluator**: Computes forces and torques on swimmers
-
-## Physics and Configuration
-
-### Fish School Formation
-
-The simulation models **4 fish in a rectangular formation**:
+### 🎯 1. C++ IBAMR with Odor Dynamics (Primary Implementation)
 
 ```
-Fish-3 (top-left)      Fish-4 (top-right)
-    x = 0.0, y = +0.2      x = 2.0, y = +0.2
-
-Fish-1 (bottom-left)   Fish-2 (bottom-right)
-    x = 0.0, y = -0.2      x = 2.0, y = -0.2
+CPP_IBAMR_With_Odor/
 ```
 
-- **Axial spacing**: dx = 2.0L (head-to-head distance)
-- **Lateral spacing**: dy = 0.4L (centerline-to-centerline)
-- **Swimming mode**: In-phase undulation (all fish synchronized)
+**Our main production implementation** - Full fluid-structure-scalar coupling using IBAMR.
 
-### Swimming Kinematics
+**Features**:
+- ✅ Incompressible Navier-Stokes fluid dynamics
+- ✅ 4 undulating fish with prescribed kinematics
+- ✅ Immersed Boundary Method for fluid-structure interaction
+- ✅ Advection-diffusion equation for odor transport
+- ✅ Strong coupling between fluid and scalar fields
+- ✅ High performance (C++ optimized)
 
-Each fish undergoes traveling wave deformation based on the Bhalla et al. (2013) eel model:
+**Use Cases**: Production simulations, parameter studies, publication-quality results
 
-**Body shape**: `h(s,t) = 0.125 * ((s + 0.03125)/1.03125) * sin(2πs - 6.28t)`
-
-**Deformation velocity**: `-0.785 * ((s + 0.03125)/1.03125) * cos(2πs - 6.28t)`
-
-Where:
-- `s` is the arc length along the fish body (0 to 1)
-- `t` is time
-- Fish length L = 1.0
-
-### Flow Parameters
-
-- **Reynolds number**: Re = 5609 (based on fish length and swimming speed)
-- **Fluid density**: ρ = 1.0
-- **Dynamic viscosity**: μ = 0.785/Re ≈ 0.00014
-- **Domain size**: 12.0 × 6.0 (length units)
-- **Periodic boundary conditions**: All directions
-
-### Computational Grid
-
-- **Base grid**: 192 × 96 cells (N=64, domain 3N × 1.5N)
-- **Refinement levels**: 3 levels with refinement ratio 4:1
-- **Finest resolution**: Near fish bodies (automatically refined)
-- **Time step**: Adaptive, CFL = 0.3, max Δt = 0.0001
-
-## Project Structure
-
-```
-Four_fish_school/
-├── example.cpp                    # Main simulation program (NS + IB + Odor)
-├── IBEELKinematics.cpp            # Fish kinematics implementation
-├── IBEELKinematics.h              # Kinematics class header
-├── input2d                        # IBAMR input configuration
-├── CMakeLists.txt                 # Build configuration
-├── eel2d_1.vertex                 # Fish-1 geometry (bottom-left)
-├── eel2d_2.vertex                 # Fish-2 geometry (bottom-right)
-├── eel2d_3.vertex                 # Fish-3 geometry (top-left)
-├── eel2d_4.vertex                 # Fish-4 geometry (top-right)
-├── generate_4fish_vertices.py     # Script to generate fish positions
-├── plot_eel_only.py               # Visualization: fish only
-├── plot_combined_fluid_eel.py     # Visualization: fish + fluid
-├── plot_odor_concentration.py     # Visualization: odor concentration field
-├── analyze_odor_plumes.py         # Analysis: odor plume statistics
-├── test_odor_transport_vortex_dynamics.py  # Validation script
-├── README_ODOR_DYNAMICS.md        # Detailed odor transport documentation
-└── *.pdf                          # Research papers (see References)
+**Quick Start**:
+```bash
+cd CPP_IBAMR_With_Odor
+mkdir build && cd build
+cmake ..
+make
+./main2d ../input2d
 ```
 
-## Building the Simulation
+[**See detailed README**](CPP_IBAMR_With_Odor/README.md)
 
-### Prerequisites
+---
 
-1. **IBAMR** installed with dependencies:
-   - PETSc (parallel linear algebra)
-   - SAMRAI (structured AMR framework)
-   - HDF5 (data output)
-   - MPI (parallel computing)
+### 🔧 2. C++ IBAMR Baseline (No Odor)
 
-2. **CMake** version ≥ 3.15
+```
+CPP_IBAMR_Baseline/
+```
 
-### Compilation Steps
+**Baseline fluid-structure interaction only** - Same as primary but WITHOUT odor transport.
+
+**Features**:
+- ✅ Incompressible Navier-Stokes fluid dynamics
+- ✅ 4 undulating fish with prescribed kinematics
+- ✅ Immersed Boundary Method
+- ❌ NO scalar transport (odor)
+
+**Use Cases**: Performance baseline, validation reference, teaching
+
+**Quick Start**:
+```bash
+cd CPP_IBAMR_Baseline
+mkdir build && cd build
+cmake ..
+make
+./main2d ../input2d
+```
+
+[**See detailed README**](CPP_IBAMR_Baseline/README.md)
+
+---
+
+### 🐍 3. Python Odor Dynamics (Reference Implementation)
+
+```
+Python_Odor_Dynamics/
+```
+
+**Python-based reference implementation** - For prototyping, validation, and analysis.
+
+**Features**:
+- ✅ Crank-Nicolson advection-diffusion solver
+- ✅ Prescribed or IBAMR-derived velocity fields
+- ✅ Comprehensive visualization tools
+- ✅ Easy to modify and extend
+- ❌ Slower performance (~100x vs C++)
+
+**Use Cases**: Rapid prototyping, validation, post-processing, learning
+
+**Quick Start**:
+```bash
+cd Python_Odor_Dynamics
+pip install -r requirements_odor_solver.txt
+python odor_transport_solver_CN.py
+```
+
+[**See detailed README**](Python_Odor_Dynamics/README.md)
+
+---
+
+### 🧪 4. IBAMR C++ Test Suite (V&V Tests)
+
+```
+IBAMR_CPP_Tests/
+```
+
+**Complete Verification & Validation test suite** - 14 tests for scalar transport validation.
+
+**Features**:
+- ✅ 14 comprehensive V&V tests
+- ✅ Analytical solution comparisons
+- ✅ Convergence rate validation
+- ✅ Literature benchmarking
+- ✅ Common utilities library
+
+**Use Cases**: Code validation, convergence testing, benchmarking
+
+**Quick Start**:
+```bash
+cd IBAMR_CPP_Tests
+./build_all_tests.sh
+cd Test01_SmokeTest
+../build/test01_smoke input2d
+```
+
+[**See detailed README**](IBAMR_CPP_Tests/README.md)
+
+---
+
+### 📊 5. Python V&V Tests (Legacy)
+
+```
+VV_Tests/
+```
+
+**Python-based V&V tests** - Original test suite (legacy, use IBAMR_CPP_Tests for new work).
+
+**Features**:
+- ✅ 14 validation tests
+- ✅ Python-based analysis scripts
+- ❌ Slower than C++ tests
+
+[**See detailed README**](VV_Tests/README.md)
+
+---
+
+## 🚀 Quick Start Guide
+
+### For Production Simulations (Recommended)
 
 ```bash
-# Create build directory
-mkdir build
-cd build
-
-# Configure with CMake
-cmake .. --debug-output
-
-# Compile (using 4 parallel jobs)
-make -j4
-
-# Return to main directory
-cd ..
+# Use C++ IBAMR with Odor
+cd CPP_IBAMR_With_Odor
+mkdir build && cd build
+cmake ..
+make
+./main2d ../input2d
 ```
 
-This creates the executable `build/main2d`.
-
-## Running the Simulation
-
-### Basic Execution
+### For Baseline Comparison
 
 ```bash
-# Run with 8 MPI processes
-mpirun -np 8 ./build/main2d input2d
+# Use C++ IBAMR Baseline (no odor)
+cd CPP_IBAMR_Baseline
+mkdir build && cd build
+cmake ..
+make
+./main2d ../input2d
 ```
 
-### Monitoring Performance
+### For Prototyping and Analysis
 
 ```bash
-# Run with memory monitoring
-mpirun -np 8 /usr/bin/time -v ./build/main2d input2d 2>&1 | grep -E "Maximum resident|Memory"
-
-# Check available system memory
-free -h
+# Use Python implementation
+cd Python_Odor_Dynamics
+pip install -r requirements_odor_solver.txt
+python odor_transport_solver_CN.py
 ```
 
-### Adjusting Resolution
-
-If memory is limited, reduce the grid resolution in `input2d`:
+### For Validation Testing
 
 ```bash
-# Reduce from N=64 to N=32 (8x less memory)
-sed -i 's/^N = 64$/N = 32/' input2d
-mpirun -np 4 ./build/main2d input2d
+# Use C++ test suite
+cd IBAMR_CPP_Tests
+export IBAMR_ROOT=/path/to/ibamr
+./build_all_tests.sh
+cd Test01_SmokeTest
+../build/test01_smoke input2d
 ```
 
-## Output Files
+## 📊 Implementation Comparison
 
-The simulation generates several output directories:
+| Feature | CPP_With_Odor | CPP_Baseline | Python_Odor | IBAMR_Tests |
+|---------|---------------|--------------|-------------|-------------|
+| **Physics** | Full NS + Odor | Full NS only | Odor only | Validation tests |
+| **Performance** | ⭐⭐⭐⭐⭐ Fast | ⭐⭐⭐⭐⭐ Fast | ⭐⭐ Slow | ⭐⭐⭐⭐⭐ Fast |
+| **Accuracy** | High | High | Medium | High |
+| **Ease of Use** | Complex | Complex | Easy | Moderate |
+| **Best For** | Production | Baseline | Prototyping | Validation |
+| **Status** | ✅ Complete | ✅ Complete | ✅ Complete | ✅ Framework Ready |
 
-### Visualization Data
+## 🔬 Scientific Background
 
-- **viz_eel2d_Str/**: VisIt/Silo visualization files
-  - Written every 40 time steps
-  - View with VisIt: `visit -o viz_eel2d_Str/dumps.visit`
+This project simulates collective behavior in fish schools with chemical communication through odor plumes.
 
-### Restart Data
+### Physics Modeled
 
-- **restart_IB2dStrDiv/**: Checkpoint files for restarting
-  - Written every 150 time steps
-  - Restart: `mpirun -np 8 ./build/main2d input2d restart_IB2dStrDiv <number>`
+1. **Fluid Dynamics** (Incompressible Navier-Stokes):
+   ```
+   ρ(∂u/∂t + u·∇u) = -∇p + μ∇²u + f
+   ∇·u = 0
+   ```
 
-### Post-Processing Data
+2. **Immersed Boundary** (fish as elastic boundaries):
+   ```
+   f(x,t) = ∫ F(s,t) δ(x - X(s,t)) ds
+   ```
 
-- **Eel2dStr/**: Hydrodynamic forces and fish kinematics
-  - `Eel2d.curve`: Time series of forces, torques, velocities, COM positions
-  - Updated every time step
-
-### Log Files
-
-- **IB2dEelStr.log**: Main simulation log
-- **IB.log**: IBAMR initialization log
-
-## Configuration Options
-
-Key parameters in `input2d`:
-
-### Physical Parameters
-
-```
-Re = 5609.0              # Reynolds number
-MU = 0.785/Re            # Dynamic viscosity
-RHO = 1.0                # Fluid density
-```
-
-### Solver Parameters
-
-```
-MAX_LEVELS = 3           # AMR levels
-REF_RATIO = 4            # Refinement ratio between levels
-N = 64                   # Base grid resolution
-CFL_MAX = 0.3            # CFL number
-DT_MAX = 0.0001          # Maximum time step
-VORTICITY_TAGGING = TRUE # Refine based on vorticity
-```
-
-### Simulation Duration
-
-```
-START_TIME = 0.0
-END_TIME = 30.0          # Simulation end time (≈ 5 tail beats)
-```
-
-### Output Intervals
-
-```
-viz_dump_interval = 40        # Visualization output
-restart_dump_interval = 150   # Restart file output
-timer_dump_interval = 100     # Performance timing output
-```
-
-## Fish Kinematics Configuration
-
-Each fish has independent kinematics in the `ConstraintIBKinematics` section of `input2d`:
-
-```
-eel2d_1 {
-    structure_names = "eel2d_1"
-    structure_levels = MAX_LEVELS - 1
-    calculate_translational_momentum = 1,1,0
-    calculate_rotational_momentum = 0,0,1
-    lag_position_update_method = "CONSTRAINT_POSITION"
-    body_shape_equation = "0.125*((X_0+0.03125)/1.03125)*sin(2*PI*X_0-(0.785/0.125)*T)"
-    deformation_velocity_function_0 = "(-0.785*((X_0+0.03125)/1.03125)*cos(2*PI*X_0-(0.785/0.125)*T))*N_0"
-    deformation_velocity_function_1 = "(-0.785*((X_0+0.03125)/1.03125)*cos(2*PI*X_0-(0.785/0.125)*T))*N_1"
-}
-```
-
-### Modifying Swimming Behavior
-
-- **Phase offset**: Add phase to time term: `-(0.785/0.125)*T + phi`
-- **Wave amplitude**: Change coefficient `0.125`
-- **Wave speed**: Modify `0.785/0.125` (currently ≈ 6.28 rad/s)
-- **Wavelength**: Change `2*PI` coefficient
-
-## Hydrodynamic Force Analysis
-
-The simulation computes for each fish:
-
-- **Total force**: F = F_hydro + F_inertial
-- **Torque**: About center of mass
-- **Power**: P = F · v
-- **Translational velocity**: COM velocity
-- **Rotational velocity**: Angular velocity
-- **Momentum**: Linear and angular
-
-Data written to `Eel2dStr/Eel2d.curve`.
-
-## Odor Transport Dynamics
-
-This simulation includes **passive scalar transport** to model odor advection-diffusion coupled with fish swimming. The odor field C(x,y,t) satisfies:
-
-```
-∂C/∂t + u·∇C = κ∇²C + S(x,y,t)
-```
+3. **Scalar Transport** (odor advection-diffusion):
+   ```
+   ∂C/∂t + u·∇C = κ∇²C + S
+   ```
 
 ### Key Features
 
-- **Advection-Diffusion Solver**: IBAMR's `AdvDiffHierarchyIntegrator`
-- **Coupling**: One-way (fluid affects odor, odor doesn't affect fluid)
-- **Source Term**: Continuous Gaussian source at (-2.0, 0.0)
-- **Schmidt Number**: Sc = ν/κ (configurable)
-- **Visualization**: Odor contours, vortex-odor interaction
+- **4 Undulating Fish**: Prescribed kinematics with tail-beat frequency
+- **Vortex-Odor Coupling**: Vortices modulate odor spreading
+- **Schmidt Number Effects**: Validated for Sc = 1 to 1000
+- **Mass Conservation**: Conservative scalar transport
 
-### Physical Parameters
+## 📖 Documentation
 
-```
-KAPPA = 1.0e-3              # Molecular diffusivity
-SCHMIDT = MU / (RHO * KAPPA)  # Schmidt number
-```
+Each directory contains comprehensive documentation:
 
-### Odor Visualization
+- [**CPP_IBAMR_With_Odor/README.md**](CPP_IBAMR_With_Odor/README.md) - Full implementation guide
+- [**CPP_IBAMR_Baseline/README.md**](CPP_IBAMR_Baseline/README.md) - Baseline implementation
+- [**Python_Odor_Dynamics/README.md**](Python_Odor_Dynamics/README.md) - Python reference
+- [**IBAMR_CPP_Tests/README.md**](IBAMR_CPP_Tests/README.md) - Complete V&V test suite
+- [**README_REPOSITORY_STRUCTURE.md**](README_REPOSITORY_STRUCTURE.md) - Detailed organization
 
-```bash
-# Visualize odor concentration at iteration 200
-python plot_odor_concentration.py 200
+## 🛠️ Installation
 
-# Analyze odor plume statistics
-python analyze_odor_plumes.py --stats
+### Prerequisites
 
-# Single iteration analysis
-python analyze_odor_plumes.py 200
-```
+#### For C++ Implementations
 
-### Output Fields
+- **IBAMR** (0.12.0+): https://ibamr.github.io/installing/
+- **SAMRAI** (included with IBAMR)
+- **PETSc** (3.14+)
+- **HDF5** (1.10+)
+- **MPI** (OpenMPI or MPICH)
+- **CMake** (3.12+)
+- **C++ Compiler**: GCC 7+ or Clang 5+
 
-- **C**: Odor concentration (normalized C* = (C-C_l)/(C_h-C_l))
-- **∇C**: Concentration gradient (odor sharpness)
-- **Mixing efficiency**: Vortex-enhanced spreading metric
+#### For Python Implementation
 
-**See [README_ODOR_DYNAMICS.md](README_ODOR_DYNAMICS.md) for complete documentation.**
+- **Python** (3.8+)
+- **NumPy** (1.20+)
+- **Matplotlib** (3.3+)
+- **SciPy** (1.6+)
 
-## Visualization
+### Installation Steps
 
-### Using Python Scripts
-
-```bash
-# Plot fish positions only
-python plot_eel_only.py
-
-# Plot fish with fluid velocity/vorticity
-python plot_combined_fluid_eel.py
-```
-
-### Using VisIt
+#### 1. Install IBAMR (for C++ implementations)
 
 ```bash
-visit -o viz_eel2d_Str/dumps.visit
+# Follow IBAMR installation guide
+# https://ibamr.github.io/installing/
+
+export IBAMR_ROOT=/path/to/ibamr/installation
 ```
 
-Recommended pseudocolor plots:
-- **Velocity magnitude**: Shows flow around fish
-- **Vorticity**: Shows vortex structures
-- **Pressure**: Shows pressure distribution
+#### 2. Install Python packages (for Python implementation)
 
-## Scientific Background
+```bash
+pip install -r Python_Odor_Dynamics/requirements_odor_solver.txt
+```
 
-### References
+## 📁 Directory Structure
 
-#### Fish Swimming and Hydrodynamics
+```
+Four_fish_school/
+│
+├── README.md                              ← This file
+├── README_REPOSITORY_STRUCTURE.md         ← Detailed organization guide
+│
+├── CPP_IBAMR_With_Odor/                  ← PRIMARY: C++ with odor (Production)
+│   ├── main.cpp
+│   ├── IBEELKinematics.cpp/h
+│   ├── input2d
+│   ├── CMakeLists.txt
+│   ├── eel2d*.vertex
+│   └── README.md
+│
+├── CPP_IBAMR_Baseline/                   ← Baseline: C++ without odor
+│   ├── main.cpp
+│   ├── IBEELKinematics.cpp/h
+│   ├── input2d
+│   ├── CMakeLists.txt
+│   ├── eel2d*.vertex
+│   └── README.md
+│
+├── Python_Odor_Dynamics/                 ← Reference: Python implementation
+│   ├── odor_transport_solver_CN.py
+│   ├── test_*.py
+│   ├── plot_*.py
+│   ├── analyze_odor_plumes.py
+│   ├── requirements_odor_solver.txt
+│   └── README.md
+│
+├── IBAMR_CPP_Tests/                      ← Test Suite: 14 V&V tests
+│   ├── common/                           ← Shared utilities
+│   ├── Test01_SmokeTest/                 ← Fully implemented
+│   ├── Test02-14/                        ← Template structures
+│   ├── build_all_tests.sh
+│   ├── run_all_tests.sh
+│   ├── CMakeLists.txt
+│   ├── README.md
+│   └── QUICK_START.md
+│
+├── VV_Tests/                             ← Legacy: Python V&V tests
+│   ├── Test01-14/
+│   └── README.md
+│
+└── *.pdf                                  ← Reference papers
+```
 
-1. **Bhalla et al. (2013)**: "A unified mathematical framework and an adaptive numerical method for fluid-structure interaction with rigid, deforming, and elastic bodies." *Journal of Computational Physics*, 250:446-476.
-   - Eel kinematics model used in this simulation
+## 🎯 Development Workflow
 
-2. **Peskin (2002)**: "The immersed boundary method." *Acta Numerica*, 11:479-517.
-   - Foundational immersed boundary method
+### Recommended Workflow
 
-3. **Griffith & Patankar (2020)**: "Immersed Methods for Fluid-Structure Interaction." *Annual Review of Fluid Mechanics*, 52:421-448.
-   - Review of IB methods in FSI
+1. **Prototype** in `Python_Odor_Dynamics/`
+   - Quick iterations
+   - Test new ideas
+   - Validate concepts
 
-#### Odor Transport and Vortex Dynamics
+2. **Validate** with `IBAMR_CPP_Tests/`
+   - Run V&V tests
+   - Check convergence
+   - Verify correctness
 
-4. **"How does vortex dynamics help undulating bodies spread odor.pdf"** (included in repository)
-   - Vortex-enhanced odor spreading mechanisms
-   - Flapping kinematics effects on mixing
-   - Quantification of mixing efficiency
-   - *Directly applicable to this simulation's odor transport module*
+3. **Implement** in `CPP_IBAMR_With_Odor/`
+   - Production code
+   - High performance
+   - Publication results
 
-5. **"Navigation in odor plumes How do the flapping kinematics modulate the odor landscape.pdf"** (included in repository)
-   - Odor landscape structure in fish wakes
-   - Effects of schooling formations on odor plumes
-   - Sensory information content in turbulent odor fields
-   - *Provides context for analyzing simulation results*
+4. **Baseline Compare** with `CPP_IBAMR_Baseline/`
+   - Measure odor impact
+   - Performance comparison
+   - Isolate physics
 
-### Fish Schooling Hydrodynamics
+### Example: Adding New Feature
 
-This simulation enables study of:
-- **Wake interactions**: How downstream fish interact with leader vortices
-- **Energy savings**: Reduced swimming cost in formations
-- **Lateral forces**: Side-to-side interactions between neighbors
-- **Collective dynamics**: Emergent behaviors from local interactions
+```bash
+# Step 1: Prototype in Python
+cd Python_Odor_Dynamics
+# ... test new source term ...
 
-## Performance Considerations
+# Step 2: Validate implementation
+cd ../IBAMR_CPP_Tests
+# ... run relevant tests ...
 
-### Memory Requirements
+# Step 3: Implement in C++
+cd ../CPP_IBAMR_With_Odor
+# ... add to main.cpp ...
 
-Approximate memory usage:
-- **N=32**: ~2-4 GB (4 processes)
-- **N=64**: ~16-32 GB (8 processes)
-- **N=128**: ~128-256 GB (16+ processes)
+# Step 4: Compare with baseline
+cd ../CPP_IBAMR_Baseline
+# ... run without new feature ...
+```
 
-### Computational Cost
+## 📚 References
 
-- **N=64**: ~10-20 hours for END_TIME=30.0 (8 cores)
-- Scales with: grid resolution, number of fish, refinement levels
+### Papers
 
-### Optimization Tips
+1. **Lei, H., et al. (2021)**: "Navigation in odor plumes: How do the flapping kinematics modulate the odor landscape"
+   - PDF: `Navigation in odor plumes How do the flapping kinematics modulate the odor landscape.pdf`
+   - Key results: Sphere source validation, pitching airfoil effects
 
-1. Use appropriate MPI process count (typically 4-16 for N=64)
-2. Enable vorticity tagging for efficient AMR
-3. Adjust `viz_dump_interval` (higher = less I/O)
-4. Use restart files for long simulations
+2. **Kamran, M., et al. (2024)**: "How does vortex dynamics help undulating bodies spread odor"
+   - PDF: `How does vortex dynamics help undulating bodies spread odor.pdf`
+   - Key results: High Schmidt numbers, vortex-odor coupling
 
-## Troubleshooting
+### IBAMR Resources
+
+- **Website**: https://ibamr.github.io/
+- **Documentation**: https://ibamr.github.io/docs/
+- **GitHub**: https://github.com/IBAMR/IBAMR
+- **Examples**: https://github.com/IBAMR/IBAMR/tree/master/examples
+
+## 🤝 Contributing
+
+When adding new implementations or modifications:
+
+1. Follow the existing directory structure
+2. Include comprehensive README.md files
+3. Document all parameters and assumptions
+4. Provide build/run instructions
+5. Add validation tests where appropriate
+
+## 📄 License
+
+[Specify license information]
+
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-**"Out of memory" error**:
-- Reduce `N` in input2d (N=32 or N=48)
-- Reduce `MAX_LEVELS` to 2
-- Increase MPI processes to distribute memory
+#### "IBAMR not found"
+```bash
+export IBAMR_ROOT=/path/to/ibamr
+export CMAKE_PREFIX_PATH=$IBAMR_ROOT:$CMAKE_PREFIX_PATH
+```
 
-**Simulation crashes**:
-- Check `DT_MAX` is not too large (≤ 0.0001)
-- Verify `CFL_MAX ≤ 0.3`
-- Ensure vertex files match input2d configuration
+#### "Python packages missing"
+```bash
+pip install -r Python_Odor_Dynamics/requirements_odor_solver.txt
+```
 
-**Slow performance**:
-- Increase MPI process count
-- Reduce output frequency
-- Check load balancing in log files
+#### "Segmentation fault"
+- Check grid resolution in input2d
+- Verify all vertex files exist
+- Check memory limits
 
-## License
+#### "Slow performance"
+- Use C++ implementation, not Python
+- Increase MPI processes
+- Reduce grid resolution for testing
 
-This code is distributed under the 3-clause BSD license, consistent with IBAMR.
+## 📧 Contact
 
-Copyright (c) 2014-2024 by the IBAMR developers. All rights reserved.
+For specific questions:
+- **C++ with odor**: See `CPP_IBAMR_With_Odor/README.md`
+- **Baseline**: See `CPP_IBAMR_Baseline/README.md`
+- **Python**: See `Python_Odor_Dynamics/README.md`
+- **Tests**: See `IBAMR_CPP_Tests/README.md`
 
-## Contact and Support
+## 🔗 Quick Links
 
-For IBAMR-specific questions:
-- IBAMR GitHub Issues: https://github.com/IBAMR/IBAMR/issues
-- IBAMR Google Group: https://groups.google.com/g/ibamr-users
+- [Repository Structure Guide](README_REPOSITORY_STRUCTURE.md)
+- [C++ with Odor (Primary)](CPP_IBAMR_With_Odor/README.md)
+- [C++ Baseline](CPP_IBAMR_Baseline/README.md)
+- [Python Reference](Python_Odor_Dynamics/README.md)
+- [Test Suite](IBAMR_CPP_Tests/README.md)
+- [IBAMR Documentation](https://ibamr.github.io/docs/)
 
-## Acknowledgments
+---
 
-This implementation follows the official IBAMR eel2d example and extends it to multi-fish schooling configurations. Thanks to the IBAMR development team for providing this powerful FSI framework.
+**Repository Status**: Active Development
+**Primary Focus**: C++ IBAMR with Odor Dynamics
+**Last Updated**: 2025-11-17
+**Branch**: `main`
