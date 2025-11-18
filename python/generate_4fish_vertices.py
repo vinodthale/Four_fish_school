@@ -29,14 +29,14 @@ def main():
     print("4-FISH VERTEX GENERATOR  (dx=2.0L, dy=0.4L)")
     print("=" * 55)
 
-    base = "eel2d.vertex"
-    backup = "eel2d_original.vertex"
+    # Get script directory and geometry directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    geometry_dir = os.path.join(os.path.dirname(script_dir), "geometry")
+
+    base = os.path.join(geometry_dir, "eel2d.vertex")
     if not os.path.exists(base):
-        print("[ERROR] Base file 'eel2d.vertex' not found.")
+        print(f"[ERROR] Base file '{base}' not found.")
         sys.exit(1)
-    if not os.path.exists(backup):
-        os.system(f"cp {base} {backup}")
-        print("[INFO] Created backup:", backup)
 
     fish_config = [
         ("eel2d_1.vertex", 0.0, -0.2),  # bottom-left
@@ -46,7 +46,8 @@ def main():
     ]
 
     for fname, dx, dy in fish_config:
-        transform_vertex_file(backup, fname, dx, dy)
+        output_path = os.path.join(geometry_dir, fname)
+        transform_vertex_file(base, output_path, dx, dy)
         print(f"[OK] {fname}  (x={dx}, y={dy})")
 
     print("\nAll vertex files generated successfully!")

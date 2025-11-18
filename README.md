@@ -75,18 +75,43 @@ Four_fish_school/
 ├── IBEELKinematics.h              # Kinematics class header
 ├── input2d                        # IBAMR input configuration
 ├── CMakeLists.txt                 # Build configuration
-├── eel2d_1.vertex                 # Fish-1 geometry (bottom-left)
-├── eel2d_2.vertex                 # Fish-2 geometry (bottom-right)
-├── eel2d_3.vertex                 # Fish-3 geometry (top-left)
-├── eel2d_4.vertex                 # Fish-4 geometry (top-right)
-├── generate_4fish_vertices.py     # Script to generate fish positions
-├── plot_eel_only.py               # Visualization: fish only
-├── plot_combined_fluid_eel.py     # Visualization: fish + fluid
-├── plot_odor_concentration.py     # Visualization: odor concentration field
-├── analyze_odor_plumes.py         # Analysis: odor plume statistics
-├── test_odor_transport_vortex_dynamics.py  # Validation script
-├── README_ODOR_DYNAMICS.md        # Detailed odor transport documentation
-└── *.pdf                          # Research papers (see References)
+├── geometry/                      # Fish geometry files
+│   ├── eel2d.vertex               # Base fish geometry
+│   ├── eel2d_1.vertex             # Fish-1 (bottom-left)
+│   ├── eel2d_2.vertex             # Fish-2 (bottom-right)
+│   ├── eel2d_3.vertex             # Fish-3 (top-left)
+│   └── eel2d_4.vertex             # Fish-4 (top-right)
+├── python/                        # Python analysis scripts
+│   ├── generate_4fish_vertices.py     # Generate fish positions
+│   ├── plot_eel_only.py               # Visualization: fish only
+│   ├── plot_combined_fluid_eel.py     # Visualization: fish + fluid
+│   ├── plot_odor_concentration.py     # Visualization: odor field
+│   ├── analyze_odor_plumes.py         # Analysis: odor statistics
+│   ├── odor_transport_solver_CN.py    # Crank-Nicolson solver
+│   ├── test_odor_transport_vortex_dynamics.py  # Validation script
+│   ├── test_cpp_odor_integration.py   # C++ integration test
+│   ├── test_odor_CN_with_ibamr.py     # IBAMR integration test
+│   └── requirements_odor_solver.txt   # Python dependencies
+├── docs/                          # Documentation
+│   ├── README_ODOR_DYNAMICS.md        # Odor transport docs
+│   ├── README_ODOR_DYNAMICS_CPP.md    # C++ implementation docs
+│   ├── README_ADVECTION_DIFFUSION_EQUATION.md
+│   ├── README_ODOR_PLUME_NAVIGATION.md
+│   ├── README_ODOR_SOLVER_CN.md       # Crank-Nicolson solver docs
+│   ├── README_ODOR_TRANSPORT_TEST.md
+│   ├── IBAMR_IMPLEMENTATION_REVIEW.md # Implementation review
+│   ├── IMPLEMENTATION_SUMMARY.md      # Summary document
+│   ├── MVP_COMPLETION_REPORT.md       # MVP report
+│   ├── PRODUCTION_PRECHECK.md         # Pre-check verification
+│   └── How to Run.txt                 # Quick start guide
+├── papers/                        # Research papers
+│   ├── How does vortex dynamics help undulating bodies spread odor.pdf
+│   └── Navigation in odor plumes How do the flapping kinematics modulate the odor landscape.pdf
+└── IBAMR_CPP_Tests/              # Comprehensive test suite
+    ├── Test01_SmokeTest/          # Basic functionality
+    ├── Test02_Diffusion_Analytic/ # Diffusion validation
+    ├── ... (Tests 03-17)          # Additional validation tests
+    └── README.md                  # Test suite documentation
 ```
 
 ## Building the Simulation

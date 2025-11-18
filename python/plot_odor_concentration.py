@@ -24,7 +24,7 @@ from pathlib import Path
 # Configuration
 VIZ_DIR = "viz_eel2d_Str"
 OUTPUT_DIR = "odor_figures"
-FISH_FILES = ["eel2d_1.vertex", "eel2d_2.vertex", "eel2d_3.vertex", "eel2d_4.vertex"]
+FISH_FILES = ["geometry/eel2d_1.vertex", "geometry/eel2d_2.vertex", "geometry/eel2d_3.vertex", "geometry/eel2d_4.vertex"]
 
 # Physical parameters (from input2d)
 Re = 5609.0
